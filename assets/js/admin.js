@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Автосалон 911 — личный кабинет (управление каталогом)
+   Автосалон 911 — личный кабинет (Supabase + демо-fallback)
    ========================================================================== */
 (function () {
   'use strict';
@@ -7,19 +7,31 @@
   var $ = function (id) { return document.getElementById(id); };
   var loginScreen = $('loginScreen'), adminScreen = $('adminScreen'), logoutBtn = $('logoutBtn');
   var currentImages = [];
+  var isSB = (window.Store && Store.mode === 'supabase');
 
   /* ---------- Тосты ---------- */
   function toast(msg, ok) {
     var wrap = $('toastWrap'), t = document.createElement('div');
     t.className = 'toast' + (ok ? ' toast--ok' : ''); t.textContent = msg; wrap.appendChild(t);
-    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .4s'; setTimeout(function () { t.remove(); }, 400); }, 4000);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .4s'; setTimeout(function () { t.remove(); }, 400); }, 4200);
   }
 
-  /* ---------- Авторизация ---------- */
+  /* ---------- Режим входа (демо / Supabase) ---------- */
+  if (!isSB) {
+    // демо: email не нужен
+    var ef = $('emailField'); if (ef) ef.style.display = 'none';
+    var em = $('emailInput'); if (em) em.removeAttribute('required');
+  } else {
+    var em2 = $('emailInput'); if (em2) em2.setAttribute('required', 'required');
+    var hint = $('loginHint'); if (hint) hint.textContent = 'Вход защищён Supabase Auth. Доступ только у администратора салона.';
+  }
+
+  /* ---------- Экран входа / кабинета ---------- */
   function showAdmin() {
     loginScreen.style.display = 'none';
     adminScreen.style.display = 'block';
     logoutBtn.style.display = 'inline-flex';
+    if (isSB) { var e = Store.currentUserEmail(); if (e) logoutBtn.textContent = 'Выйти (' + e + ')'; }
     renderList();
   }
   function showLogin() {
@@ -27,30 +39,46 @@
     adminScreen.style.display = 'none';
     logoutBtn.style.display = 'none';
   }
-  if (Store.isAuthed()) showAdmin(); else showLogin();
+
+  // ждём восстановления сессии, затем решаем что показать
+  loginScreen.style.display = 'none';
+  Store.ready.then(function () {
+    if (Store.isAuthed()) showAdmin(); else showLogin();
+  });
+  if (window.Store && Store.onAuthChange) {
+    Store.onAuthChange(function (authed) { if (authed) showAdmin(); else showLogin(); });
+  }
 
   $('loginForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    if (Store.login($('passInput').value)) { toast('Добро пожаловать!', true); showAdmin(); }
-    else { toast('Неверный пароль'); $('passInput').value = ''; }
+    var btn = e.target.querySelector('button[type=submit]');
+    var email = ($('emailInput') && $('emailInput').value || '').trim();
+    var pass = $('passInput').value;
+    btn.disabled = true; var old = btn.textContent; btn.textContent = 'Вход…';
+    Store.login(email, pass).then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res.ok) { toast('Добро пожаловать!', true); $('passInput').value = ''; if (!isSB) showAdmin(); }
+      else { toast(res.error || 'Не удалось войти'); $('passInput').value = ''; }
+    });
   });
-  logoutBtn.addEventListener('click', function () { Store.logout(); showLogin(); toast('Вы вышли из кабинета'); });
+  logoutBtn.addEventListener('click', function () {
+    Store.logout().then(function () { showLogin(); toast('Вы вышли из кабинета'); });
+  });
 
   /* ---------- Список авто + статистика ---------- */
   function renderList() {
-    var cars = Store.getCars();
-    var total = cars.length, sold = cars.filter(function (c) { return c.sold; }).length;
-    var hot = cars.filter(function (c) { return c.featured && !c.sold; }).length;
-    var inStock = total - sold;
-    $('adminStats').innerHTML =
-      stat(total, 'Всего авто') + stat(inStock, 'В наличии') + stat(sold, 'Продано') + stat(hot, 'Хиты продаж');
-
-    $('adminList').innerHTML = cars.map(rowHTML).join('') ||
-      '<div class="empty-state">Пока нет авто. Нажмите «+ Добавить авто».</div>';
-
-    $('adminList').querySelectorAll('[data-edit]').forEach(function (b) { b.addEventListener('click', function () { openModal(b.getAttribute('data-edit')); }); });
-    $('adminList').querySelectorAll('[data-del]').forEach(function (b) { b.addEventListener('click', function () { removeCar(b.getAttribute('data-del')); }); });
-    $('adminList').querySelectorAll('[data-sold]').forEach(function (b) { b.addEventListener('click', function () { toggleSold(b.getAttribute('data-sold')); }); });
+    $('adminList').innerHTML = '<div class="empty-state">Загрузка…</div>';
+    Store.listCars().then(function (cars) {
+      var total = cars.length, sold = cars.filter(function (c) { return c.sold; }).length;
+      var hot = cars.filter(function (c) { return c.featured && !c.sold; }).length;
+      $('adminStats').innerHTML = stat(total, 'Всего авто') + stat(total - sold, 'В наличии') + stat(sold, 'Продано') + stat(hot, 'Хиты продаж');
+      $('adminList').innerHTML = cars.map(rowHTML).join('') || '<div class="empty-state">Пока нет авто. Нажмите «+ Добавить авто».</div>';
+      $('adminList').querySelectorAll('[data-edit]').forEach(function (b) { b.addEventListener('click', function () { openModal(b.getAttribute('data-edit')); }); });
+      $('adminList').querySelectorAll('[data-del]').forEach(function (b) { b.addEventListener('click', function () { removeCar(b.getAttribute('data-del')); }); });
+      $('adminList').querySelectorAll('[data-sold]').forEach(function (b) { b.addEventListener('click', function () { toggleSold(b.getAttribute('data-sold')); }); });
+    }).catch(function (err) {
+      $('adminList').innerHTML = '<div class="empty-state">Ошибка загрузки: ' + esc(err && err.message || '') + '</div>';
+    });
   }
   function stat(n, label) { return '<div class="admin-stat"><b>' + n + '</b><span>' + label + '</span></div>'; }
 
@@ -75,36 +103,37 @@
 
   /* ---------- Модалка формы ---------- */
   var carModal = $('carModal');
-  function openModal(id) {
-    currentImages = [];
-    $('carForm').reset();
-    $('carId').value = '';
-    if (id) {
-      var c = Store.getCar(id);
-      if (c) {
-        $('modalTitle').textContent = 'Редактировать авто';
-        $('carId').value = c.id;
-        $('brand').value = c.brand || ''; $('model').value = c.model || '';
-        $('year').value = c.year || ''; $('price').value = c.price || '';
-        $('mileage').value = c.mileage || ''; $('engine').value = c.engine || '';
-        $('transmission').value = c.transmission || ''; $('drive').value = c.drive || '';
-        $('body').value = c.body || ''; $('color').value = c.color || '';
-        $('description').value = c.description || '';
-        $('featured').checked = !!c.featured; $('sold').checked = !!c.sold;
-        currentImages = (c.images || []).slice();
-      }
-    } else {
-      $('modalTitle').textContent = 'Добавить авто';
-    }
+  function fillForm(c) {
+    $('modalTitle').textContent = c ? 'Редактировать авто' : 'Добавить авто';
+    $('carId').value = c ? c.id : '';
+    $('brand').value = c ? (c.brand || '') : ''; $('model').value = c ? (c.model || '') : '';
+    $('year').value = c && c.year || ''; $('price').value = c && c.price || '';
+    $('mileage').value = c && c.mileage || ''; $('engine').value = c ? (c.engine || '') : '';
+    $('transmission').value = c ? (c.transmission || '') : ''; $('drive').value = c ? (c.drive || '') : '';
+    $('body').value = c ? (c.body || '') : ''; $('color').value = c ? (c.color || '') : '';
+    $('description').value = c ? (c.description || '') : '';
+    $('featured').checked = !!(c && c.featured); $('sold').checked = !!(c && c.sold);
+    currentImages = c && c.images ? c.images.slice() : [];
     renderThumbs();
-    carModal.classList.add('open');
+  }
+  function openModal(id) {
+    $('carForm').reset();
+    if (id) {
+      Store.getCar(id).then(function (c) { fillForm(c); carModal.classList.add('open'); });
+    } else {
+      fillForm(null); carModal.classList.add('open');
+    }
   }
   function closeModals() { document.querySelectorAll('.modal').forEach(function (m) { m.classList.remove('open'); }); }
   document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeModals); });
   document.querySelectorAll('.modal').forEach(function (m) { m.addEventListener('click', function (e) { if (e.target === m) closeModals(); }); });
 
   $('addBtn').addEventListener('click', function () { openModal(null); });
-  $('settingsBtn').addEventListener('click', function () { $('settingsModal').classList.add('open'); });
+  $('settingsBtn').addEventListener('click', function () {
+    // в Supabase-режиме локальная смена пароля не нужна
+    var pf = $('passForm'); if (pf) pf.style.display = isSB ? 'none' : 'block';
+    $('settingsModal').classList.add('open');
+  });
 
   /* ---------- Фото: выбор, drag&drop, сжатие ---------- */
   var dropZone = $('dropZone'), photosInput = $('photos');
@@ -130,11 +159,11 @@
     reader.onload = function (e) {
       var img = new Image();
       img.onload = function () {
-        var max = 1100, w = img.width, h = img.height;
+        var max = 1400, w = img.width, h = img.height;
         if (w > max || h > max) { if (w > h) { h = Math.round(h * max / w); w = max; } else { w = Math.round(w * max / h); h = max; } }
         var canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        try { cb(canvas.toDataURL('image/jpeg', 0.78)); } catch (err) { cb(null); }
+        try { cb(canvas.toDataURL('image/jpeg', 0.82)); } catch (err) { cb(null); }
       };
       img.onerror = function () { cb(null); };
       img.src = e.target.result;
@@ -156,53 +185,59 @@
   /* ---------- Сохранение авто ---------- */
   $('carForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    var id = $('carId').value || Store.newId();
-    var existing = $('carId').value ? Store.getCar(id) : null;
+    var editing = !!$('carId').value;
     var car = {
-      id: id,
-      brand: $('brand').value.trim(),
-      model: $('model').value.trim(),
-      year: parseInt($('year').value, 10) || null,
-      price: parseInt($('price').value, 10) || 0,
-      mileage: parseInt($('mileage').value, 10) || null,
-      engine: $('engine').value.trim(),
-      transmission: $('transmission').value,
-      drive: $('drive').value,
-      body: $('body').value,
-      color: $('color').value.trim(),
-      description: $('description').value.trim(),
-      images: currentImages.slice(),
-      featured: $('featured').checked,
-      sold: $('sold').checked,
-      created: existing ? existing.created : Date.now()
+      id: $('carId').value || Store.newId(),
+      brand: $('brand').value.trim(), model: $('model').value.trim(),
+      year: parseInt($('year').value, 10) || null, price: parseInt($('price').value, 10) || 0,
+      mileage: parseInt($('mileage').value, 10) || null, engine: $('engine').value.trim(),
+      transmission: $('transmission').value, drive: $('drive').value,
+      body: $('body').value, color: $('color').value.trim(),
+      description: $('description').value.trim(), images: currentImages.slice(),
+      featured: $('featured').checked, sold: $('sold').checked, created: Date.now()
     };
-    if (!car.images.length) car.images = [Store.PLACEHOLDER(car.brand || 'АВТО', [car.year, car.transmission].filter(Boolean).join(' · '))];
-    var ok = Store.upsertCar(car);
-    if (!ok) { toast('Не хватает места в браузере. Уменьшите число фото.'); return; }
-    closeModals(); renderList();
-    toast($('carId').value ? 'Авто обновлено' : 'Авто добавлено в каталог', true);
+    var btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true; var old = btn.textContent;
+    btn.textContent = (isSB && currentImages.some(function (s) { return s.indexOf('data:') === 0; })) ? 'Загрузка фото…' : 'Сохранение…';
+    Store.saveCar(car).then(function () {
+      btn.disabled = false; btn.textContent = old;
+      closeModals(); renderList();
+      toast(editing ? 'Авто обновлено' : 'Авто добавлено в каталог', true);
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = old;
+      toast('Ошибка сохранения: ' + (err && err.message || 'проверьте настройки Supabase'));
+    });
   });
 
   function removeCar(id) {
-    var c = Store.getCar(id);
-    if (!confirm('Удалить «' + [c.brand, c.model].filter(Boolean).join(' ') + '» из каталога?')) return;
-    Store.deleteCar(id); renderList(); toast('Авто удалено');
+    Store.getCar(id).then(function (c) {
+      if (!c) return;
+      if (!confirm('Удалить «' + [c.brand, c.model].filter(Boolean).join(' ') + '» из каталога?')) return;
+      Store.deleteCar(id).then(function () { renderList(); toast('Авто удалено'); })
+        .catch(function (err) { toast('Ошибка удаления: ' + (err && err.message || '')); });
+    });
   }
   function toggleSold(id) {
-    var c = Store.getCar(id); if (!c) return;
-    c.sold = !c.sold; Store.upsertCar(c); renderList();
-    toast(c.sold ? 'Отмечено как продано' : 'Возвращено в наличие', true);
+    Store.getCar(id).then(function (c) {
+      if (!c) return;
+      c.sold = !c.sold;
+      Store.saveCar(c).then(function () { renderList(); toast(c.sold ? 'Отмечено как продано' : 'Возвращено в наличие', true); })
+        .catch(function (err) { toast('Ошибка: ' + (err && err.message || '')); });
+    });
   }
 
   /* ---------- Настройки ---------- */
-  $('passForm').addEventListener('submit', function (e) {
+  var passForm = $('passForm');
+  if (passForm) passForm.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (isSB) { toast('В режиме Supabase пароль меняется в панели Supabase'); return; }
     Store.setPassword($('newPass').value); $('newPass').value = '';
     closeModals(); toast('Пароль изменён', true);
   });
   $('resetBtn').addEventListener('click', function () {
+    if (isSB) { toast('Сброс доступен только в демо-режиме'); return; }
     if (!confirm('Сбросить каталог к примерам? Добавленные авто будут удалены.')) return;
-    Store.resetCars(); closeModals(); renderList(); toast('Каталог сброшен к примерам');
+    Store.resetCars().then(function () { closeModals(); renderList(); toast('Каталог сброшен к примерам'); });
   });
 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModals(); });

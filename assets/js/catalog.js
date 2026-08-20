@@ -19,8 +19,10 @@
   var fTrans = document.getElementById('filterTrans');
   var sortSel = document.getElementById('sort');
 
+  var allCars = [];
+
   function render() {
-    var list = Store.getCars();
+    var list = allCars.slice();
     var q = (search.value || '').toLowerCase().trim();
     var body = fBody.value, trans = fTrans.value, sort = sortSel.value;
 
@@ -73,9 +75,16 @@
   [search, fBody, fTrans, sortSel].forEach(function (el) {
     el.addEventListener('input', render); el.addEventListener('change', render);
   });
-  render();
-  // обновление, если авто изменили в другой вкладке (админка)
-  window.addEventListener('storage', function (e) { if (e.key && e.key.indexOf('a911_cars') === 0) render(); });
+
+  function load() {
+    grid.innerHTML = '<div class="empty-state">Загрузка каталога…</div>';
+    return Store.ready.then(function () { return Store.listCars(); }).then(function (cars) {
+      allCars = cars; render();
+    }).catch(function () { grid.innerHTML = '<div class="empty-state">Не удалось загрузить каталог. Обновите страницу.</div>'; });
+  }
+  load();
+  // обновление, если авто изменили в другой вкладке (демо-режим)
+  window.addEventListener('storage', function (e) { if (e.key && e.key.indexOf('a911_cars') === 0) load(); });
 
   function plural(n, f) { n = Math.abs(n) % 100; var n1 = n % 10; if (n > 10 && n < 20) return f[2]; if (n1 > 1 && n1 < 5) return f[1]; if (n1 === 1) return f[0]; return f[2]; }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }

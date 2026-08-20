@@ -49,8 +49,10 @@
   /* ---------- Превью каталога (первые 6) ---------- */
   var previewGrid = document.getElementById('previewGrid');
   if (previewGrid && window.Store) {
-    var cars = Store.getCars().slice(0, 6);
-    previewGrid.innerHTML = cars.map(carCardHTML).join('');
+    Store.ready.then(function () { return Store.listCars(); }).then(function (cars) {
+      previewGrid.innerHTML = cars.filter(function (c) { return !c.sold; }).slice(0, 6).map(carCardHTML).join('');
+      previewGrid.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    });
   }
 
   function carCardHTML(c) {
@@ -134,7 +136,6 @@
     // повторно наблюдаем новые .reveal
     reviewsGrid.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
   }
-  previewGrid && previewGrid.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
   /* ---------- Лайтбокс ---------- */
   var lb = document.getElementById('lightbox');

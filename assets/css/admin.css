@@ -72,4 +72,14 @@
   .admin-row { grid-template-columns: 64px 1fr; }
   .admin-row__img { width: 64px; height: 48px; }
   .admin-row__actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .admin-topbar__actions { width: 100%; }
+  .admin-topbar__actions .btn { flex: 1; }
+}
+@media (max-width: 480px) {
+  .login-card { padding: 26px 20px; margin: 20px auto; }
+  .modal { padding: 16px 10px; }
+  .modal__head, .modal__body { padding: 18px; }
+  .modal__foot { flex-direction: column-reverse; }
+  .modal__foot .btn { width: 100%; }
+  .switch-row { gap: 16px; }
 }

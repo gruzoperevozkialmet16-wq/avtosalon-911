@@ -333,16 +333,61 @@ h1, h2, h3, .h { font-family: var(--font-head); font-weight: 600; line-height: 1
   .reviews-grid { grid-template-columns: 1fr; }
   .contacts-grid { grid-template-columns: 1fr; }
   .footer__grid { grid-template-columns: 1fr; gap: 26px; }
-  .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+  .gallery { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 150px; }
   .lightbox__nav--prev { left: 8px; } .lightbox__nav--next { right: 8px; }
 }
-@media (max-width: 560px) {
+
+/* --- Планшеты и крупные телефоны --- */
+@media (max-width: 760px) {
+  .header__inner { height: 62px; gap: 12px; }
+  .logo__badge { width: 40px; height: 40px; font-size: 17px; }
+  .logo__text b { font-size: 17px; letter-spacing: 1px; }
+  .logo__text span { display: none; }
+  .header__cta { gap: 8px; }
+  .header__cta .btn--primary { display: none; }          /* оставляем телефон + бургер */
+  .header__phone { font-size: 16px; }
+  .mobile-menu { inset: 62px 0 auto 0; }
   .services-grid { grid-template-columns: 1fr; }
   .cars-grid { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
-  .hero__stats { gap: 20px; }
-  .header__phone { font-size: 15px; }
-  .btn { padding: 13px 22px; font-size: 14px; }
+  .buyout__card { border-radius: 20px; }
+  .buyout__panel { padding: 22px; }
+  .hero__actions .btn, .reviews-cta .btn { width: 100%; }
+  .hero__actions, .reviews-cta { width: 100%; }
+  .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 42vw; gap: 10px; }
+  .gallery__item--wide { grid-column: span 2; }
+  .gallery__item--tall { grid-row: span 1; }             /* без высоких на узком экране */
+  .lightbox__nav { width: 44px; height: 44px; }
+}
+
+/* --- Телефоны --- */
+@media (max-width: 480px) {
+  .section { padding: 46px 0; }
+  .container { padding: 0 16px; }
+  h1, .hero h1 { letter-spacing: 0; }
+  .hero { padding-top: 44px; }
+  .hero__badges { gap: 8px; }
+  .chip { padding: 7px 12px; font-size: 12px; }
+  .hero__stats { gap: 18px 26px; margin-top: 36px; }
+  .stat { min-width: 40%; }
+  .section-head h2 { font-size: 28px; }
+  .buyout__panel { padding: 18px; }
+  .car-card__foot { flex-wrap: wrap; }
+  .car-card__foot .btn { flex: 1 1 100%; }
+  .contact-item { padding: 16px; gap: 12px; }
+  .contact-item b { font-size: 15px; }
+  .footer__bottom { flex-direction: column; align-items: flex-start; }
+  .btn { padding: 13px 20px; font-size: 14px; }
+  .btn--lg { padding: 15px 24px; font-size: 15px; }
+  .toast-wrap { left: 16px; right: 16px; transform: none; }
+  .toast { font-size: 13px; }
+}
+
+/* --- Узкие телефоны --- */
+@media (max-width: 360px) {
+  .header__phone { font-size: 14px; }
+  .logo__text b { font-size: 15px; }
+  .gallery { grid-auto-rows: 44vw; }
 }
 
 /* ---- Скролл-бар ---- */
