@@ -1,0 +1,7 @@
+# Зависимости / временное
+node_modules/
+.vercel/
+.DS_Store
+Thumbs.db
+*.log
+.cache/

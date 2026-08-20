@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Авто в наличии — Автосалон 911, Альметьевск</title>
+  <meta name="description" content="Каталог автомобилей с пробегом в наличии — Автосалон 911, Альметьевск. Фильтры по цене, году, коробке передач. Кредит, трейд-ин, выкуп." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23e11d2a'/%3E%3Ctext x='50' y='68' font-family='Arial' font-weight='bold' font-size='46' fill='white' text-anchor='middle'%3E911%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header__inner">
+      <a href="index.html" class="logo">
+        <span class="logo__badge">911</span>
+        <span class="logo__text"><b>Автосалон 911</b><span>Авто с пробегом · Альметьевск</span></span>
+      </a>
+      <nav class="nav">
+        <a href="index.html#services">Услуги</a>
+        <a href="index.html#buyout">Выкуп</a>
+        <a href="catalog.html">Авто в наличии</a>
+        <a href="index.html#happy">Покупатели</a>
+        <a href="index.html#reviews">Отзывы</a>
+        <a href="index.html#contacts">Контакты</a>
+      </nav>
+      <div class="header__cta">
+        <a href="tel:+79178997267" class="header__phone">8 917 899‑72‑67<small>Ежедневно 10:00–20:00</small></a>
+        <a href="index.html#buyout" class="btn btn--primary">Выкуп авто</a>
+        <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html#services">Услуги</a>
+    <a href="index.html#buyout">Выкуп авто</a>
+    <a href="catalog.html">Авто в наличии</a>
+    <a href="index.html#happy">Счастливые покупатели</a>
+    <a href="index.html#reviews">Отзывы</a>
+    <a href="index.html#contacts">Контакты</a>
+    <a href="tel:+79178997267">📞 8 917 899‑72‑67</a>
+  </div>
+
+  <section class="section section--tight" style="padding-top:48px">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:26px">
+        <span class="eyebrow">Каталог</span>
+        <h2>Авто в наличии</h2>
+        <p>Проверенные автомобили с пробегом. Кредит · Трейд‑ин · Реализация под комиссию.</p>
+      </div>
+
+      <div class="catalog-toolbar">
+        <input type="search" id="search" placeholder="🔍 Поиск: марка, модель…" />
+        <select id="filterBody">
+          <option value="">Все кузова</option>
+          <option>Седан</option><option>Хэтчбек</option><option>Внедорожник</option>
+          <option>Кроссовер</option><option>Универсал</option><option>Купе</option><option>Минивэн</option>
+        </select>
+        <select id="filterTrans">
+          <option value="">Любая КПП</option>
+          <option>Автомат</option><option>Механика</option><option>Робот</option><option>Вариатор</option>
+        </select>
+        <select id="sort">
+          <option value="new">Сначала новые</option>
+          <option value="cheap">Сначала дешевле</option>
+          <option value="expensive">Сначала дороже</option>
+          <option value="year">По году (новее)</option>
+        </select>
+        <span class="catalog-count" id="count"></span>
+      </div>
+
+      <div class="cars-grid" id="grid"></div>
+      <div class="empty-state" id="empty" style="display:none">По вашему запросу авто не найдено. Позвоните — подберём под ваш бюджет: <a href="tel:+79178997267" class="text-accent"><b>8 917 899‑72‑67</b></a></div>
+    </div>
+  </section>
+
+  <section class="section--tight" style="border-top:1px solid var(--border)">
+    <div class="container" style="text-align:center">
+      <h2 class="h" style="font-size:clamp(24px,4vw,38px);text-transform:uppercase;margin-bottom:12px">Не нашли подходящий вариант?</h2>
+      <p style="color:var(--muted);margin-bottom:24px">Расскажите, что ищете — подберём авто под ваш бюджет и оформим кредит или трейд‑ин.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="tel:+79178997267" class="btn btn--primary btn--lg">📞 Позвонить</a>
+        <a href="https://t.me/Vandr_AM" target="_blank" rel="noopener" class="btn btn--ghost btn--lg">✈️ Написать в Telegram</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__bottom" style="border:0;padding-top:0">
+        <span>© <span id="year"></span> Автосалон 911. Альметьевск, пр‑т Строителей, 2с4.</span>
+        <a href="admin.html">Личный кабинет →</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/catalog.js"></script>
+</body>
+</html>
