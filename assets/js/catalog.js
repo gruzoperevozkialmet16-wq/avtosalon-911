@@ -3,7 +3,7 @@
    ========================================================================== */
 (function () {
   'use strict';
-  var TG = 'https://t.me/Vandr_AM', PHONE = '+79178997267';
+  var MAX = 'https://max.ru/join/HBsn5LjCstFD8546mRrOXGchu4H7MfQ1rc7fV7HKlq8', PHONE = '+79178997267';
 
   var y = document.getElementById('year');
   if (y) y.textContent = new Date().getFullYear();
@@ -56,7 +56,6 @@
     ].filter(Boolean).map(function (s) { return '<span class="spec">' + esc(s) + '</span>'; }).join('');
     var tag = c.sold ? '' : (c.featured ? '<span class="car-card__tag car-card__tag--hot">🔥 Хит</span>' : '<span class="car-card__tag">В наличии</span>');
     var sold = c.sold ? '<div class="car-card__sold"><span>Продано</span></div>' : '';
-    var msg = encodeURIComponent('Здравствуйте! Интересует ' + [c.brand, c.model, c.year].filter(Boolean).join(' ') + ' за ' + Store.formatPrice(c.price) + '. Ещё в наличии?');
     return '<article class="car-card">' +
       '<div class="car-card__media">' + tag + sold + '<img src="' + img + '" alt="' + escAttr((c.brand || '') + ' ' + (c.model || '')) + '" loading="lazy" /></div>' +
       '<div class="car-card__body">' +
@@ -68,7 +67,7 @@
       (c.sold
         ? '<a href="catalog.html" class="btn btn--ghost" style="flex:1">Смотреть другие</a>'
         : '<a href="tel:' + PHONE + '" class="btn btn--primary" style="flex:1">Позвонить</a>' +
-          '<a href="' + TG + '?text=' + msg + '" target="_blank" rel="noopener" class="btn btn--ghost">Написать</a>') +
+          '<a href="' + MAX + '" target="_blank" rel="noopener" class="btn btn--ghost">Написать</a>') +
       '</div></div></article>';
   }
 

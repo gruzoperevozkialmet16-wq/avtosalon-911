@@ -87,6 +87,7 @@ h1, h2, h3, .h { font-family: var(--font-head); font-weight: 600; line-height: 1
 }
 .header__inner { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 20px; }
 .logo { display: flex; align-items: center; gap: 12px; font-family: var(--font-head); }
+.logo__img { height: 44px; width: auto; display: block; border-radius: 7px; box-shadow: 0 2px 12px rgba(0, 0, 0, .4); }
 .logo__badge {
   width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center;
   background: linear-gradient(135deg, var(--accent), #8f0f18);
@@ -103,7 +104,8 @@ h1, h2, h3, .h { font-family: var(--font-head); font-weight: 600; line-height: 1
 .nav a:hover { color: var(--text); }
 .nav a::after { content: ''; position: absolute; left: 0; bottom: -6px; height: 2px; width: 0; background: var(--accent); transition: width .25s; }
 .nav a:hover::after { width: 100%; }
-.header__cta { display: flex; align-items: center; gap: 12px; }
+.header__cta { display: flex; align-items: center; gap: 14px; }
+.header__cta .btn { padding: 10px 20px; font-size: 14px; }   /* компактнее — вровень с шапкой */
 .header__phone { font-family: var(--font-head); font-size: 18px; letter-spacing: .5px; white-space: nowrap; }
 .header__phone small { display: block; font-family: var(--font-body); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
 .header__call { display: none; width: 44px; height: 44px; border-radius: 50%; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px -6px var(--accent-glow); flex: none; }
@@ -342,6 +344,7 @@ h1, h2, h3, .h { font-family: var(--font-head); font-weight: 600; line-height: 1
 /* --- Планшеты и крупные телефоны --- */
 @media (max-width: 760px) {
   .header__inner { height: 62px; gap: 12px; }
+  .logo__img { height: 36px; }
   .logo__badge { width: 40px; height: 40px; font-size: 17px; }
   .logo__text b { font-size: 17px; letter-spacing: 1px; }
   .logo__text span { display: none; }

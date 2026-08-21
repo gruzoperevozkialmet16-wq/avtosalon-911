@@ -5,6 +5,7 @@
   'use strict';
 
   var TG = 'https://t.me/Vandr_AM';
+  var MAX = 'https://max.ru/join/HBsn5LjCstFD8546mRrOXGchu4H7MfQ1rc7fV7HKlq8';
   var PHONE = '+79178997267';
 
   /* ---------- Год в футере ---------- */
@@ -65,7 +66,6 @@
     ].filter(Boolean).map(function (s) { return '<span class="spec">' + s + '</span>'; }).join('');
     var tag = c.featured ? '<span class="car-card__tag car-card__tag--hot">🔥 Хит</span>' : '<span class="car-card__tag">В наличии</span>';
     var sold = c.sold ? '<div class="car-card__sold"><span>Продано</span></div>' : '';
-    var msg = encodeURIComponent('Здравствуйте! Интересует ' + [c.brand, c.model, c.year].filter(Boolean).join(' ') + ' за ' + Store.formatPrice(c.price) + '. Ещё в наличии?');
     return '' +
       '<article class="car-card reveal">' +
       '<div class="car-card__media">' + tag + sold + '<img src="' + img + '" alt="' + escapeAttr((c.brand || '') + ' ' + (c.model || '')) + '" loading="lazy" /></div>' +
@@ -76,7 +76,7 @@
       (c.description ? '<p class="car-card__desc">' + escapeHtml(c.description) + '</p>' : '') +
       '<div class="car-card__foot">' +
       '<a href="tel:' + PHONE + '" class="btn btn--primary" style="flex:1">Позвонить</a>' +
-      '<a href="' + TG + '?text=' + msg + '" target="_blank" rel="noopener" class="btn btn--ghost">Написать</a>' +
+      '<a href="' + MAX + '" target="_blank" rel="noopener" class="btn btn--ghost">Написать</a>' +
       '</div></div></article>';
   }
 
@@ -185,8 +185,17 @@
         'Телефон: ' + (f.get('phone') || '—') + '\n' +
         'Авто: ' + (f.get('car') || '—') + ', ' + (f.get('year') || '—') + ' г.\n' +
         'Комментарий: ' + (f.get('comment') || '—');
-      window.open(TG + '?text=' + encodeURIComponent(text), '_blank');
-      toast('Заявка сформирована — открываем Telegram. Или позвоните: 8 917 899‑72‑67', true);
+      function openMax() { window.open(MAX, '_blank'); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          toast('Заявка скопирована — вставьте её в чат MAX. Или позвоните: 8 917 899‑72‑67', true);
+          openMax();
+        }, function () {
+          toast('Открываем MAX. Или позвоните: 8 917 899‑72‑67', true); openMax();
+        });
+      } else {
+        toast('Открываем MAX. Или позвоните: 8 917 899‑72‑67', true); openMax();
+      }
       form.reset();
     });
   }
