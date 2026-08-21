@@ -309,6 +309,34 @@ h1, h2, h3, .h { font-family: var(--font-head); font-weight: 600; line-height: 1
 .review-badge--gis { background: rgba(60, 200, 120, .12); color: #46d38a; }
 .reviews-cta { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 34px; }
 
+/* ---- Репутация ---- */
+.reputation__card {
+  position: relative; overflow: hidden; text-align: center;
+  background: radial-gradient(120% 140% at 100% 0%, rgba(225, 29, 42, .18), transparent 55%), linear-gradient(135deg, #17070a, #0b0b0e 65%);
+  border: 1px solid var(--border-strong); border-radius: 28px;
+  padding: clamp(46px, 7vw, 90px) clamp(24px, 5vw, 72px);
+}
+.reputation__wm {
+  position: absolute; right: -1%; top: 50%; transform: translateY(-50%);
+  font-family: var(--font-head); font-weight: 700; line-height: 1; letter-spacing: -6px;
+  font-size: clamp(210px, 36vw, 480px); color: transparent;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, .06); text-stroke: 2px rgba(255, 255, 255, .06);
+  pointer-events: none; user-select: none; white-space: nowrap;
+}
+.reputation__content { position: relative; z-index: 1; }
+.reputation__content .eyebrow { justify-content: center; }
+.reputation h2 { font-size: clamp(30px, 6vw, 60px); text-transform: uppercase; margin: 16px 0 18px; }
+.reputation__lead { font-size: clamp(16px, 2.6vw, 23px); color: var(--muted); max-width: 660px; margin: 0 auto; line-height: 1.5; }
+.reputation__lead b { color: var(--text); font-weight: 700; }
+.reputation__lead em {
+  font-style: normal; font-family: var(--font-head); font-size: 1.12em; padding: 0 3px;
+  color: #fff; -webkit-text-stroke: 1.5px #08080a; text-stroke: 1.5px #08080a; paint-order: stroke fill;
+}
+.reputation__stars { color: var(--gold); font-size: 24px; letter-spacing: 7px; margin-top: 24px; text-shadow: 0 2px 14px rgba(229, 193, 90, .3); }
+.reputation__place { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 14px; color: var(--muted); }
+.reputation__place svg { width: 16px; height: 16px; color: var(--accent-2); }
+@media (max-width: 560px) { .reputation__wm { font-size: 190px; opacity: .8; right: -10%; } }
+
 /* ---- Контакты ---- */
 .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .contacts-list { display: grid; gap: 14px; }
