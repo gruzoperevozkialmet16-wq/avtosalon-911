@@ -12,7 +12,7 @@
    Как только впишете url и anonKey — каталог станет общим для всех посетителей.
    ========================================================================== */
 window.SUPABASE_CONFIG = {
-  url: '',
-  anonKey: '',
+  url: 'https://bfsrngafhpcytkmzbopa.supabase.co',
+  anonKey: '', // ← вставить anon public key из Supabase → Project Settings → API
   bucket: 'car-photos'
 };
