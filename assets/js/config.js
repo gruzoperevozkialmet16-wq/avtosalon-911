@@ -13,6 +13,6 @@
    ========================================================================== */
 window.SUPABASE_CONFIG = {
   url: 'https://bfsrngafhpcytkmzbopa.supabase.co',
-  anonKey: '', // ← вставить anon public key из Supabase → Project Settings → API
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmc3JuZ2FmaHBjeXRrbXpib3BhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDM4MDYsImV4cCI6MjEwMjgxOTgwNn0.nJIgbyKh_jtj_ySt3BAZOza_reVHc2eHpDQKWKJL8SU',
   bucket: 'car-photos'
 };
