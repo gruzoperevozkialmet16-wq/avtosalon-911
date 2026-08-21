@@ -145,7 +145,33 @@ h1, h2, h3, .h { font-family: var(--font-head); font-weight: 600; line-height: 1
   background-size: 60px 60px; mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
 }
-.hero__inner { max-width: 860px; }
+.hero__inner { max-width: 860px; position: relative; }
+
+/* --- Анимация фона: поток авто (тема «выкуп авто») --- */
+.hero__cars { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.drive-car { position: absolute; display: block; will-change: transform; animation: drive linear infinite; }
+.drive-car svg { width: 100%; height: auto; display: block; }
+.drive-car--1 { top: 16%; width: 150px; color: rgba(255, 255, 255, .07); animation-duration: 26s; animation-delay: -4s; }
+.drive-car--2 { top: 42%; width: 200px; color: rgba(225, 29, 42, .12); animation-duration: 34s; animation-delay: -18s; }
+.drive-car--3 { top: 68%; width: 120px; color: rgba(255, 255, 255, .05); animation-duration: 20s; animation-delay: -10s; }
+.drive-car--4 { top: 84%; width: 168px; color: rgba(255, 255, 255, .06); animation-duration: 40s; animation-delay: -30s; }
+@keyframes drive {
+  from { transform: translateX(-220px); }
+  to { transform: translateX(calc(100vw + 60px)); }
+}
+/* Движущаяся «дорожная разметка» внизу hero */
+.hero__road {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: -1; pointer-events: none;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .18) 0 26px, transparent 26px 52px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  animation: roadmove 1.1s linear infinite;
+}
+@keyframes roadmove { to { background-position-x: -52px; } }
+@media (prefers-reduced-motion: reduce) {
+  .drive-car, .hero__road { animation: none; }
+  .hero__cars { display: none; }
+}
 .hero__badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 26px; }
 .chip {
   display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 999px;
