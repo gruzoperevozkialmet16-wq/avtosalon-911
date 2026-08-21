@@ -1,7 +1,8 @@
 -- ============================================================================
--- Автосалон 911 — настройка Supabase
--- Откройте панель Supabase → SQL Editor → New query → вставьте это → Run.
--- Скрипт можно запускать повторно (idempotent).
+-- Автосалон 911 — схема Supabase (уже применена к проекту через MCP)
+-- Этот файл — документация актуального состояния базы. Idempotent.
+-- Модель доступа: каталог читают все; добавлять/менять авто и грузить фото
+-- могут только администраторы из белого списка public.app_admins.
 -- ============================================================================
 
 create extension if not exists "pgcrypto";
@@ -25,24 +26,40 @@ create table if not exists public.cars (
   sold          boolean not null default false,
   created_at    timestamptz not null default now()
 );
-
 alter table public.cars enable row level security;
 
--- Читать каталог могут все (в т.ч. анонимные посетители)
+-- ---- Белый список администраторов (по email из JWT) -------------------------
+create table if not exists public.app_admins (
+  email     text primary key,
+  added_at  timestamptz not null default now()
+);
+alter table public.app_admins enable row level security;
+
+drop policy if exists "admins self read" on public.app_admins;
+create policy "admins self read" on public.app_admins for select to authenticated
+  using ( email = (auth.jwt() ->> 'email') );
+
+-- Добавить администратора (замените email на реальный):
+--   insert into public.app_admins (email) values ('admin@example.com');
+
+-- ---- Политики для cars ------------------------------------------------------
 drop policy if exists "cars public read" on public.cars;
 create policy "cars public read" on public.cars for select using (true);
 
--- Добавлять / менять / удалять — только вошедший администратор
-drop policy if exists "cars auth insert" on public.cars;
-create policy "cars auth insert" on public.cars for insert to authenticated with check (true);
+drop policy if exists "cars admin insert" on public.cars;
+create policy "cars admin insert" on public.cars for insert to authenticated
+  with check ( (auth.jwt() ->> 'email') in (select email from public.app_admins) );
 
-drop policy if exists "cars auth update" on public.cars;
-create policy "cars auth update" on public.cars for update to authenticated using (true) with check (true);
+drop policy if exists "cars admin update" on public.cars;
+create policy "cars admin update" on public.cars for update to authenticated
+  using ( (auth.jwt() ->> 'email') in (select email from public.app_admins) )
+  with check ( (auth.jwt() ->> 'email') in (select email from public.app_admins) );
 
-drop policy if exists "cars auth delete" on public.cars;
-create policy "cars auth delete" on public.cars for delete to authenticated using (true);
+drop policy if exists "cars admin delete" on public.cars;
+create policy "cars admin delete" on public.cars for delete to authenticated
+  using ( (auth.jwt() ->> 'email') in (select email from public.app_admins) );
 
--- ---- Хранилище фото ---------------------------------------------------------
+-- ---- Хранилище фото (bucket car-photos, публичное чтение) -------------------
 insert into storage.buckets (id, name, public)
 values ('car-photos', 'car-photos', true)
 on conflict (id) do update set public = true;
@@ -50,16 +67,19 @@ on conflict (id) do update set public = true;
 drop policy if exists "photos public read" on storage.objects;
 create policy "photos public read" on storage.objects for select using (bucket_id = 'car-photos');
 
-drop policy if exists "photos auth insert" on storage.objects;
-create policy "photos auth insert" on storage.objects for insert to authenticated with check (bucket_id = 'car-photos');
+drop policy if exists "photos admin insert" on storage.objects;
+create policy "photos admin insert" on storage.objects for insert to authenticated
+  with check ( bucket_id = 'car-photos' and (auth.jwt() ->> 'email') in (select email from public.app_admins) );
 
-drop policy if exists "photos auth update" on storage.objects;
-create policy "photos auth update" on storage.objects for update to authenticated using (bucket_id = 'car-photos');
+drop policy if exists "photos admin update" on storage.objects;
+create policy "photos admin update" on storage.objects for update to authenticated
+  using ( bucket_id = 'car-photos' and (auth.jwt() ->> 'email') in (select email from public.app_admins) );
 
-drop policy if exists "photos auth delete" on storage.objects;
-create policy "photos auth delete" on storage.objects for delete to authenticated using (bucket_id = 'car-photos');
+drop policy if exists "photos admin delete" on storage.objects;
+create policy "photos admin delete" on storage.objects for delete to authenticated
+  using ( bucket_id = 'car-photos' and (auth.jwt() ->> 'email') in (select email from public.app_admins) );
 
--- ---- Примеры авто (чтобы каталог не был пустым; можно удалить позже) --------
+-- ---- Примеры авто (вставляются только если таблица пуста) -------------------
 insert into public.cars (brand, model, year, price, mileage, engine, transmission, drive, body, color, description, featured)
 select * from (values
   ('Kia','Rio',2014,749000,128000,'1.6 (123 л.с.)','Автомат','Передний','Седан','Синий','Один владелец, обслужен, новая резина. Кредит / трейд-ин.',true),
@@ -70,5 +90,3 @@ select * from (values
   ('Mercedes-Benz','C-class (W202)',1997,349000,240000,'2.0 (136 л.с.)','Автомат','Задний','Седан','Бордовый','Классика в достойном состоянии. Реализация под комиссию.',false)
 ) as v(brand, model, year, price, mileage, engine, transmission, drive, body, color, description, featured)
 where not exists (select 1 from public.cars);
-
--- Готово. Дальше: Authentication → Users → Add user (email + пароль) для входа в кабинет.

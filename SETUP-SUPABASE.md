@@ -17,6 +17,11 @@
 1. Слева **Authentication** → **Users** → **Add user** → **Create new user**.
 2. Укажите email и пароль (например `admin@avtosalon911.ru` + надёжный пароль). Включите «Auto Confirm User».
 3. Это и будет логин/пароль для входа на `/admin`.
+4. Добавьте этот email в белый список администраторов (SQL Editor):
+   ```sql
+   insert into public.app_admins (email) values ('ВАШ_EMAIL') on conflict do nothing;
+   ```
+   Без этого вход сработает, но добавлять/менять авто нельзя (защита от посторонних).
 
 ## Шаг 4. Дать мне два публичных ключа
 Слева **Project Settings** → **API**. Пришлите мне:
